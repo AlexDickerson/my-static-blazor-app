@@ -16,6 +16,10 @@ namespace Api
 
     public class ProductData : IProductData
     {
+        //ProductData()
+        //{
+        //    products.Add(new Product { Id = 50, Name = "Pineapple", Description = "SpongeBob", Quantity = 20 });
+        //}
         private readonly List<Product> products = new List<Product>
         {
             new Product
@@ -37,6 +41,13 @@ namespace Api
                 Id = 30,
                 Name = "Apples",
                 Description = "Bag of 7 fresh McIntosh apples",
+                Quantity = 1
+            },
+              new Product
+            {
+                Id = 40,
+                Name = "Grapes",
+                Description = "1 Lb of fresh grapes",
                 Quantity = 1
             }
         };
@@ -70,6 +81,7 @@ namespace Api
 
         public Task<IEnumerable<Product>> GetProducts()
         {
+            products.Add(new Product { Id = 50, Name = "Pineapple", Description = "SpongeBob", Quantity = 20 });
             return Task.FromResult(products.AsEnumerable());
         }
     }
