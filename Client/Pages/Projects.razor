@@ -32,14 +32,32 @@
 @code {
     private string errorMessage = "";
     private IEnumerable<Project> MyProjects;
+    //private List<Project> MyProjects = new ;
     private Project ProjectToDelete;
     private bool showModal;
     private string modalMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
-       
+        //This call uses the Azure Function
         MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=" + appState.SessionID);
+
+        //This calls Workfront API Directly from the Blazor Web Assembly Client
+        //try
+        //{
+        //    http.DefaultRequestHeaders.Add("SessionID", appState.SessionID);
+        //    //DataContainer data = await http.GetFromJsonAsync<DataContainer>("https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search?sessionID=" + appState.SessionID);
+        //    DataContainer data = await http.GetFromJsonAsync<DataContainer>("https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search");
+        //    MyProjects = data.projects;
+        //}catch (Exception e)
+        //{
+        //    Project p = new Project();
+        //    p.name = e.Message;
+        //    List<Project> proj = new List<Project>();
+        //    proj.Add(p);
+        //    MyProjects = proj;
+
+        //}
     }
 
     private void AddNewProject()
@@ -51,9 +69,12 @@
     {
         //This gets the project from the Azure Function
         MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=" + appState.SessionID);
-    
+
         //This call attemps to call the Workfront API 
+        //DataContainer data = await http.GetFromJsonAsync<DataContainer>("https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search?sessionID=" + appState.SessionID);
+        //MyProjects = data.projects;
         //MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects?SessionID=" + S + SessionID    
+
     }
 
     private void SelectProject(Project Project)
