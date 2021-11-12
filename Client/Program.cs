@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Client.Models;
 
 namespace Client
 {
@@ -15,7 +16,7 @@ namespace Client
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["API_Prefix"] ?? builder.HostEnvironment.BaseAddress) });
             //builder.Services.AddSingleton<ICartService, CartService>();
-            builder.Services.AddSingleton<int, N>();
+            builder.Services.AddSingleton<IState, State>();
 
             await builder.Build().RunAsync();
         }

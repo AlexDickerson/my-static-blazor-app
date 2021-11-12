@@ -1,7 +1,9 @@
 ﻿@page "/projects"
 @page "/projects/{SessionID}"
 @using Microsoft.AspNetCore.WebUtilities; 
+@using Client.Models
 @inject HttpClient http
+@inject IState appState
 @inject NavigationManager navigation
 
 <div class="content-container">
@@ -11,7 +13,7 @@
                 RoutePath="/Projects" />
     <div class="columns is-multiline is-variable">
         <div class="column is-8">
-            SessionID is: @SessionID
+            SessionID is: @appState.SessionID
             <ProjectList ErrorMessage="@errorMessage"
                          Projects="@MyProjects"
                          SelectProject="@SelectProject"
@@ -40,13 +42,17 @@
     protected override async Task OnInitializedAsync()
     {
         var uri = navigation.ToAbsoluteUri(navigation.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("SessionID", out sessionIDParm))
+        if (String.IsNullOrEmpty(appState.SessionID))
         {
-            SessionID = sessionIDParm;
-        }
-        else 
-            SessionID = "Not set";
-        MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=SessionID");
+            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("SessionID", out sessionIDParm))
+            {
+                SessionID = sessionIDParm;
+                appState.SessionID = sessionIDParm;
+            }
+            else
+                appState.SessionID = "Not set";
+}
+        MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=" + appState.SessionID);
     }
 
     private void AddNewProject()
@@ -56,7 +62,7 @@
 
     private async Task HandleRefresh()
     {
-        MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects");
+        MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=" + appState.SessionID);
     //MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects?SessionID=" + S + SessionID    
     }
 
@@ -80,7 +86,7 @@
 
     private async Task DeleteFromModal()
     {
-        await http.DeleteAsync($"api/Projects/{ProjectToDelete.ID}");
+        await http.DeleteAsync($"api/Projects/{ProjectToDelete.ID}"+ "?SessionID=" + appState.SessionID);
         await HandleRefresh();
         ProjectToDelete = null;
         showModal = false;
