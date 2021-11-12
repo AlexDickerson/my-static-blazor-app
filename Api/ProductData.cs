@@ -81,7 +81,7 @@ namespace Api
 
         public Task<IEnumerable<Product>> GetProducts()
         {
-            products.Add(new Product { Id = 50, Name = "Pineapple", Description = "SpongeBob", Quantity = 20 });
+            //products.Add(new Product { Id = 50, Name = "Pineapple", Description = "SpongeBob", Quantity = 20 });
             return Task.FromResult(products.AsEnumerable());
         }
     }

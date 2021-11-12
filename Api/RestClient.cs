@@ -36,9 +36,6 @@ namespace Api
             }
             string fullUrl = path;
             string fullURLCopy = fullUrl;
-            //fullUrl = fullUrl.Replace("#", "%23");
-            //if (fullUrl.Contains("search?"))
-             //   fullUrl = fullUrl + "&$$LIMIT=2000";
             
             string requestURL = string.Empty;
             WebRequest request = HttpWebRequest.CreateDefault(new Uri(fullUrl));
@@ -108,19 +105,7 @@ namespace Api
                 Exception e2 = new Exception(e.Message + System.Environment.NewLine + requestURL + System.Environment.NewLine + "error body:-->" + gZipString, e);
                 throw e2;
 
-                //Commenting out this whole section in case it needs to be re-visited on how we supress 404 errors
-                ////WF returns an error upon a successful delete.  Aggravating and the only way around that I've seen is to 
-                ////trap the error and when not found continue on.  ERD
-                //if (!e.Message.Contains("404") || (e.InnerException != null && !e.InnerException.Message.Contains("(404)")))
-                //{
-                //    Exception e2 = new Exception(e.Message + System.Environment.NewLine + requestURL, e);
-                //    throw e2;
-                //}
-                //else
-                //{
-
-                //    return null;
-                //}
+              
             }
             catch (Exception e)
             {

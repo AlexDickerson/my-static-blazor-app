@@ -1,18 +1,22 @@
 ﻿@page "/projects"
+@page "/projects/{SessionID}"
+@using Microsoft.AspNetCore.WebUtilities; 
 @inject HttpClient http
 @inject NavigationManager navigation
 
 <div class="content-container">
-    <ListHeader Title="My List2"
-                HandleAdd="@AddNewProduct"
+    <ListHeader Title="My Project List"
+                HandleAdd="@AddNewProject"
                 HandleRefresh="@HandleRefresh"
-                RoutePath="/products" />
+                RoutePath="/Projects" />
     <div class="columns is-multiline is-variable">
         <div class="column is-8">
-            <ProductList ErrorMessage="@errorMessage"
-                         Products="@products"
-                         SelectProduct="@SelectProduct"
-                         DeleteProduct="@DeleteProduct" />
+            SessionID is: @SessionID
+            <ProjectList ErrorMessage="@errorMessage"
+                         Projects="@MyProjects"
+                         SelectProject="@SelectProject"
+                         DeleteProject="@DeleteProject" 
+                         />
         </div>
     </div>
 
@@ -25,49 +29,60 @@
 
 @code {
     private string errorMessage = "";
-    private IEnumerable<Product> products;
-    private Product productToDelete;
+    private IEnumerable<Project> MyProjects;
+    private Project ProjectToDelete;
     private bool showModal;
     private string modalMessage = "";
+    [Parameter] 
+    public string SessionID { get; set; }
+    Microsoft.Extensions.Primitives.StringValues sessionIDParm;
 
     protected override async Task OnInitializedAsync()
     {
-        products = await http.GetFromJsonAsync<IEnumerable<Product>>("api/products");
+        var uri = navigation.ToAbsoluteUri(navigation.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("SessionID", out sessionIDParm))
+        {
+            SessionID = sessionIDParm;
+        }
+        else 
+            SessionID = "Not set";
+        MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=SessionID");
     }
 
-    private void AddNewProduct()
+    private void AddNewProject()
     {
-        navigation.NavigateTo("/product/0");
+        navigation.NavigateTo("/Project/0");
     }
 
     private async Task HandleRefresh()
     {
-        products = await http.GetFromJsonAsync<IEnumerable<Product>>("api/products");
+        MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects");
+    //MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects?SessionID=" + S + SessionID    
     }
 
-    private void SelectProduct(Product product)
+    private void SelectProject(Project Project)
     {
-        navigation.NavigateTo($"/product/{product.Id}");
+        navigation.NavigateTo($"/Project/{Project.ID}");
     }
 
-    private void DeleteProduct(Product product)
+    private void DeleteProject(Project Project)
     {
-        productToDelete = product;
+        ProjectToDelete = Project;
         showModal = true;
-        modalMessage = $"Would you like to delete {productToDelete.Name}";
+        modalMessage = $"Would you like to delete {ProjectToDelete.name}";
     }
 
     private void CloseModal()
     {
-        productToDelete = null;
+        ProjectToDelete = null;
         showModal = false;
     }
 
     private async Task DeleteFromModal()
     {
-        await http.DeleteAsync($"api/products/{productToDelete.Id}");
+        await http.DeleteAsync($"api/Projects/{ProjectToDelete.ID}");
         await HandleRefresh();
-        productToDelete = null;
+        ProjectToDelete = null;
         showModal = false;
     }
 }

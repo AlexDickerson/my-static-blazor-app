@@ -23,7 +23,8 @@ namespace Api
             ILogger log)
         {
             var result = await productData.DeleteProduct(productId);
-
+            IQueryCollection iq = req.Query;
+            string myX = iq["SessionID"];
             if (result)
             {
                 return new OkResult();
