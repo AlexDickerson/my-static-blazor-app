@@ -89,7 +89,7 @@ namespace Api
             if((SessionID != null) && !SessionID.ToUpper().Equals("NOT SET"))
             {
                 Api.RestClient client = new RestClient();
-                string url = "https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search?sessionID=" + SessionID;
+                string url = "https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search?description_Mod=notnull&fields=description,percentComplete&sessionID=" + SessionID;
                 JToken mytoken = client.DoRequest(url);
                 Projects = JsonConvert.DeserializeObject<List<Project>>(mytoken["data"].ToString());
 
