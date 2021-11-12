@@ -28,14 +28,15 @@ namespace Api
                 throw myExc;
             }
         }
-        public JToken DoRequest(string path,string sessionID)
+        public JToken DoRequest(string path)
         {
-            if (!path.StartsWith("/"))
-            {
-                path = "/" + path;
-            }
-            string fullUrl = path;
+            //if (!path.StartsWith("/"))
+            //{
+            //    path = "/" + path;
+            //}
+            string fullUrl = path;// + "&sessionID="+sessionID;
             string fullURLCopy = fullUrl;
+           
             
             string requestURL = string.Empty;
             WebRequest request = HttpWebRequest.CreateDefault(new Uri(fullUrl));

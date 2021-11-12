@@ -1,4 +1,6 @@
 ﻿using Data;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +12,7 @@ namespace Api
     {
         Task<Project> AddProject(Project Project);
         //Task<bool> DeleteProject(string id);
-        Task<IEnumerable<Project>> GetProjects();
+        Task<IEnumerable<Project>> GetProjects(string SessionID);
         Task<Project> UpdateProject(Project Project);
     }
 
@@ -20,35 +22,37 @@ namespace Api
         //{
         //    Projects.Add(new Project { Id = 50, Name = "Pineapple", Description = "SpongeBob", Quantity = 20 });
         //}
-        private readonly List<Project> Projects = new List<Project>
+        //JsonConvert.DeserializeObject<WFProject>(tokenString);
+        private List<Project> Projects = new List<Project>(); //= new List<Project>
+        private readonly List<Project> Projects2 = new List<Project>
         {
             new Project
             {
                 ID = "asdfasdf",
                 name = "Strawberry Project",
                 description = "16oz package of fresh organic strawberries",
-                Quantity = 1
+                percentComplete = "10"
             },
             new Project
             {
                 ID = "20",
                 name = "Sliced bread Project",
                 description = "Load of fresh sliced wheat bread",
-                Quantity = 1
+                percentComplete = "20"
             },
             new Project
             {
                 ID = "30",
                 name = "Apple Project",
                 description = "Bag of 7 fresh McIntosh apples",
-                Quantity = 1
+                percentComplete = "33"
             },
               new Project
             {
                 ID = "40",
                 name = "Grape Project",
                 description = "1 Lb of fresh grapes",
-                Quantity = 1
+                percentComplete = "50"
             }
         };
 
@@ -79,10 +83,23 @@ namespace Api
             return Task.FromResult(true);
         }
 
-        public Task<IEnumerable<Project>> GetProjects()
+        public Task<IEnumerable<Project>> GetProjects(string SessionID)
         {
-            Projects.Add(new Project { ID = "50", name = "Pineapple", description = "SpongeBob", Quantity = 20 });
-            return Task.FromResult(Projects.AsEnumerable());
+            Projects.Clear();
+            if((SessionID != null) && !SessionID.ToUpper().Equals("NOT SET"))
+            {
+                Api.RestClient client = new RestClient();
+                string url = "https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search?sessionID=" + SessionID;
+                JToken mytoken = client.DoRequest(url);
+                Projects = JsonConvert.DeserializeObject<List<Project>>(mytoken["data"].ToString());
+
+                //Projects.Add(new Project { ID = "50", name = "Pineapple", description = "SpongeBob", Quantity = 20 });
+                return Task.FromResult(Projects.AsEnumerable());
+            }
+            else
+            {
+                return Task.FromResult(Projects2.AsEnumerable());
+            }
         }
     }
 }

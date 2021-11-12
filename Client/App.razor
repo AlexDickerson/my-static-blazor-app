@@ -1,3 +1,9 @@
+
+@using Microsoft.AspNetCore.WebUtilities; 
+@using Client.Models
+@inject IState appState
+@inject NavigationManager navigation
+
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
@@ -8,3 +14,34 @@
         </LayoutView>
     </NotFound>
 </Router>
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+         if (String.IsNullOrEmpty(appState.SessionID))
+        {
+             Microsoft.Extensions.Primitives.StringValues sessionIDParm;
+            var uri = navigation.ToAbsoluteUri(navigation.Uri);
+            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("SessionID", out sessionIDParm))
+            {
+                appState.SessionID = sessionIDParm;
+            }
+            else
+                appState.SessionID = "Not set";
+        }
+    }
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    if (String.IsNullOrEmpty(appState.SessionID))
+    //    {
+    //         Microsoft.Extensions.Primitives.StringValues sessionIDParm;
+    //        var uri = navigation.ToAbsoluteUri(navigation.Uri);
+    //        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("SessionID", out sessionIDParm))
+    //        {
+    //            appState.SessionID = sessionIDParm;
+    //        }
+    //        else
+    //            appState.SessionID = "Not set";
+    //    }
+    //}
+}

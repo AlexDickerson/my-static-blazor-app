@@ -1,5 +1,5 @@
 ﻿@page "/projects"
-@page "/projects/{SessionID}"
+@*@page "/projects/{SessionID}"*@
 @using Microsoft.AspNetCore.WebUtilities; 
 @using Client.Models
 @inject HttpClient http
@@ -35,23 +35,10 @@
     private Project ProjectToDelete;
     private bool showModal;
     private string modalMessage = "";
-    [Parameter] 
-    public string SessionID { get; set; }
-    Microsoft.Extensions.Primitives.StringValues sessionIDParm;
 
     protected override async Task OnInitializedAsync()
     {
-        var uri = navigation.ToAbsoluteUri(navigation.Uri);
-        if (String.IsNullOrEmpty(appState.SessionID))
-        {
-            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("SessionID", out sessionIDParm))
-            {
-                SessionID = sessionIDParm;
-                appState.SessionID = sessionIDParm;
-            }
-            else
-                appState.SessionID = "Not set";
-}
+       
         MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=" + appState.SessionID);
     }
 
@@ -62,8 +49,11 @@
 
     private async Task HandleRefresh()
     {
+        //This gets the project from the Azure Function
         MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=" + appState.SessionID);
-    //MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects?SessionID=" + S + SessionID    
+    
+        //This call attemps to call the Workfront API 
+        //MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects?SessionID=" + S + SessionID    
     }
 
     private void SelectProject(Project Project)
