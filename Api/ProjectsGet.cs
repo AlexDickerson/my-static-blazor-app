@@ -21,6 +21,7 @@ namespace Api
         {
             IQueryCollection x = req.Query;
             string sessionID = x["SessionID"];
+            string callFrom = x["calledFrom"];
             var Projects = await ProjectData.GetProjects(sessionID);
             return new OkObjectResult(Projects);
         }
