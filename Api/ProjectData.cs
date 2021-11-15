@@ -98,6 +98,9 @@ namespace Api
             }
             else
             {
+                Project p = new Project();
+                p.name = "No Session Id defined yet.";
+                   Projects2.Insert(0, p);
                 return Task.FromResult(Projects2.AsEnumerable());
             }
         }

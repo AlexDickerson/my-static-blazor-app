@@ -44,23 +44,27 @@
         //pageReferrer = await jJSRuntime.InvokeAsync<string>("getPageReferrer"); 
         //This call uses the Azure Function
         MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=" + appState.SessionID + "&calledFrom=" + pageReferrer);
+        return;
 
         //This calls Workfront API Directly from the Blazor Web Assembly Client
-        //try
-        //{
-        //    http.DefaultRequestHeaders.Add("SessionID", appState.SessionID);
-        //    //DataContainer data = await http.GetFromJsonAsync<DataContainer>("https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search?sessionID=" + appState.SessionID);
-        //    DataContainer data = await http.GetFromJsonAsync<DataContainer>("https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search");
-        //    MyProjects = data.projects;
-        //}catch (Exception e)
-        //{
-        //    Project p = new Project();
-        //    p.name = e.Message;
-        //    List<Project> proj = new List<Project>();
-        //    proj.Add(p);
-        //    MyProjects = proj;
+        try
+        {
+            //http.DefaultRequestHeaders.Add("SessionID", appState.SessionID);
+            //DataContainer data = await http.GetFromJsonAsync<DataContainer>("https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search?sessionID=" + appState.SessionID);
+            
+            DataContainer data = new DataContainer();
+            
+            data = await http.GetFromJsonAsync<DataContainer>("https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search" + "?sessionID=" + data.sessionID);
+            MyProjects = data.projects;
+        }catch (Exception e)
+        {
+            Project p = new Project();
+            p.name = e.Message;
+            List<Project> proj = new List<Project>();
+            proj.Add(p);
+            MyProjects = proj;
 
-        //}
+        }
     }
 
     private void AddNewProject()

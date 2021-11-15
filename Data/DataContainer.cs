@@ -6,7 +6,12 @@ namespace Data
 {
     public class DataContainer
     {
+     
+        public string sessionID { get; set; }   
         public List <Project> projects { get; set; }
+        public DataContainer()
+        {
 
+        }
     }
 }
