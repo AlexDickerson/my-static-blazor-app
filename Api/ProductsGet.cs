@@ -19,7 +19,9 @@ namespace Api
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "products")] HttpRequest req)
         {
-            var products = await productData.GetProducts();
+            IQueryCollection x = req.Query;
+            string y = x["SessionID"];
+            System.Collections.Generic.IEnumerable<Data.Product> products = await productData.GetProducts();
             return new OkObjectResult(products);
         }
     }

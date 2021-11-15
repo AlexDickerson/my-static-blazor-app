@@ -1,18 +1,25 @@
 ﻿@page "/projects"
+@*@page "/projects/{SessionID}"*@
+@using Microsoft.AspNetCore.WebUtilities; 
+@using Client.Models
 @inject HttpClient http
+@inject IState appState
 @inject NavigationManager navigation
+@inject IJSRuntime jJSRuntime
 
 <div class="content-container">
-    <ListHeader Title="My List2"
-                HandleAdd="@AddNewProduct"
+    <ListHeader Title="My Project List"
+                HandleAdd="@AddNewProject"
                 HandleRefresh="@HandleRefresh"
-                RoutePath="/products" />
+                RoutePath="/Projects" />
     <div class="columns is-multiline is-variable">
         <div class="column is-8">
-            <ProductList ErrorMessage="@errorMessage"
-                         Products="@products"
-                         SelectProduct="@SelectProduct"
-                         DeleteProduct="@DeleteProduct" />
+            
+            <ProjectList ErrorMessage="@errorMessage"
+                         Projects="@MyProjects"
+                         SelectProject="@SelectProject"
+                         DeleteProject="@DeleteProject" 
+                         />
         </div>
     </div>
 
@@ -25,49 +32,81 @@
 
 @code {
     private string errorMessage = "";
-    private IEnumerable<Product> products;
-    private Product productToDelete;
+    private IEnumerable<Project> MyProjects;
+    //private List<Project> MyProjects = new ;
+    private Project ProjectToDelete;
     private bool showModal;
     private string modalMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
-        products = await http.GetFromJsonAsync<IEnumerable<Product>>("api/products");
+        string pageReferrer = "not set yet";
+        //pageReferrer = await jJSRuntime.InvokeAsync<string>("getPageReferrer"); 
+        //This call uses the Azure Function
+        MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=" + appState.SessionID + "&calledFrom=" + pageReferrer);
+        return;
+
+        //This calls Workfront API Directly from the Blazor Web Assembly Client
+        try
+        {
+            //http.DefaultRequestHeaders.Add("SessionID", appState.SessionID);
+            //DataContainer data = await http.GetFromJsonAsync<DataContainer>("https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search?sessionID=" + appState.SessionID);
+            
+            DataContainer data = new DataContainer();
+            
+            data = await http.GetFromJsonAsync<DataContainer>("https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search" + "?sessionID=" + data.sessionID);
+            MyProjects = data.projects;
+        }catch (Exception e)
+        {
+            Project p = new Project();
+            p.name = e.Message;
+            List<Project> proj = new List<Project>();
+            proj.Add(p);
+            MyProjects = proj;
+
+        }
     }
 
-    private void AddNewProduct()
+    private void AddNewProject()
     {
-        navigation.NavigateTo("/product/0");
+        navigation.NavigateTo("/Project/0");
     }
 
     private async Task HandleRefresh()
     {
-        products = await http.GetFromJsonAsync<IEnumerable<Product>>("api/products");
+        //This gets the project from the Azure Function
+        MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects" + "?SessionID=" + appState.SessionID);
+
+        //This call attemps to call the Workfront API 
+        //DataContainer data = await http.GetFromJsonAsync<DataContainer>("https://denverwater.sb01.workfront.com/attask/api/v9.0/project/search?sessionID=" + appState.SessionID);
+        //MyProjects = data.projects;
+        //MyProjects = await http.GetFromJsonAsync<IEnumerable<Project>>("api/Projects?SessionID=" + S + SessionID    
+
     }
 
-    private void SelectProduct(Product product)
+    private void SelectProject(Project Project)
     {
-        navigation.NavigateTo($"/product/{product.Id}");
+        navigation.NavigateTo($"/Project/{Project.ID}");
     }
 
-    private void DeleteProduct(Product product)
+    private void DeleteProject(Project Project)
     {
-        productToDelete = product;
+        ProjectToDelete = Project;
         showModal = true;
-        modalMessage = $"Would you like to delete {productToDelete.Name}";
+        modalMessage = $"Would you like to delete {ProjectToDelete.name}";
     }
 
     private void CloseModal()
     {
-        productToDelete = null;
+        ProjectToDelete = null;
         showModal = false;
     }
 
     private async Task DeleteFromModal()
     {
-        await http.DeleteAsync($"api/products/{productToDelete.Id}");
+        await http.DeleteAsync($"api/Projects/{ProjectToDelete.ID}"+ "?SessionID=" + appState.SessionID);
         await HandleRefresh();
-        productToDelete = null;
+        ProjectToDelete = null;
         showModal = false;
     }
 }
